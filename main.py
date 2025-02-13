@@ -8,6 +8,8 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import uvicorn
+import httpx
+
 
 # Securely fetch Hugging Face API key
 HF_API_KEY = os.getenv("HF_API_KEY")
@@ -16,7 +18,7 @@ if not HF_API_KEY:
 
 # Initialize FastAPI app
 app = FastAPI()
-
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
 # Initialize Hugging Face Inference API Client
 client = InferenceClient(api_key=HF_API_KEY)
 MODEL_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
