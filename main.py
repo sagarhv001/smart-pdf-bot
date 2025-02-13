@@ -114,7 +114,6 @@ async def ask_question(query: str):
         return {"answer": generated_text}
     else:
         raise HTTPException(status_code=response.status_code, detail=response.json())
-
-
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
+    port = int(os.environ.get("PORT", 8000))  # Render sets $PORT automatically
+    uvicorn.run(app, host="0.0.0.0", port=port)
