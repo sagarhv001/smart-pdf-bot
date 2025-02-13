@@ -18,7 +18,7 @@ if not HF_API_KEY:
 
 # Initialize FastAPI app
 app = FastAPI()
-app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
+app.add_middleware( allowed_hosts=["*"])
 # Initialize Hugging Face Inference API Client
 client = InferenceClient(api_key=HF_API_KEY)
 MODEL_NAME = "meta-llama/Meta-Llama-3-8B-Instruct"
