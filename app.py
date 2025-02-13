@@ -1,5 +1,6 @@
 import streamlit as st
 import requests
+import os
 
 st.set_page_config(page_title="Smart PDF Q&A Bot", page_icon="📄", layout="wide")
 
@@ -69,7 +70,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-BACKEND_URL = "http://127.0.0.1:8000"
+BACKEND_URL = os.getenv("BACKEND_URL", "http://backend:8000")
 
 st.markdown('<h1 class="title-container">💬 Smart PDF Q&A Bot</h1>', unsafe_allow_html=True)
 
