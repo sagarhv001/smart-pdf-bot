@@ -63,7 +63,7 @@ narwhals==1.26.0
 networkx==3.4.2
 nibabel==5.3.2
 nipype==1.9.2
-numpy>=1.26.4,<2
+numpy==2.2.2
 orjson==3.10.15
 packaging==24.2
 pandas==2.2.3
