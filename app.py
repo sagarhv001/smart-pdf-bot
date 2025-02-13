@@ -70,7 +70,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-BACKEND_URL = os.getenv("BACKEND_URL", "https://your-fastapi-service.onrender.com")
+BACKEND_URL = os.getenv("BACKEND_URL", "https://smart-pdf-bot.onrender.com/")
 
 st.markdown('<h1 class="title-container">💬 Smart PDF Q&A Bot</h1>', unsafe_allow_html=True)
 
