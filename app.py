@@ -4,73 +4,24 @@ import os
 
 st.set_page_config(page_title="Smart PDF Q&A Bot", page_icon="📄", layout="wide")
 
-# Custom CSS for an enhanced gradient UI
+# Custom CSS for enhanced UI
 st.markdown(
     """
     <style>
-        .stApp {
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            color: white;
-        }
-        .stChatMessage {
-            padding: 15px;
-            border-radius: 12px;
-            margin: 10px 0;
-            max-width: 75%;
-            word-wrap: break-word;
-            font-size: 16px;
-            font-weight: 500;
-        }
-        .user {
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-            color: white;
-            align-self: flex-end;
-        }
-        .assistant {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b);
-            color: white;
-            align-self: flex-start;
-        }
-        .message-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 65vh;
-            overflow-y: auto;
-            padding-bottom: 100px; 
-        }
-        .title-container {
-            text-align: center;
-            font-size: 28px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #ff8c00, #ff2e63);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .intro-container {
-            text-align: center;
-            font-size: 18px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        .upload-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 15px;
-            border-top: 2px solid #ff2e63;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            text-align: center;
-        }
+        .stApp { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); color: white; }
+        .stChatMessage { padding: 15px; border-radius: 12px; margin: 10px 0; max-width: 75%; word-wrap: break-word; font-size: 16px; font-weight: 500; }
+        .user { background: linear-gradient(135deg, #00c6ff, #0072ff); color: white; align-self: flex-end; }
+        .assistant { background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white; align-self: flex-start; }
+        .message-container { display: flex; flex-direction: column; gap: 10px; max-height: 65vh; overflow-y: auto; padding-bottom: 100px; }
+        .title-container { text-align: center; font-size: 28px; font-weight: bold; background: linear-gradient(135deg, #ff8c00, #ff2e63); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .intro-container { text-align: center; font-size: 18px; background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; margin-top: 20px; }
+        .upload-container { position: fixed; bottom: 0; left: 0; width: 100%; padding: 15px; border-top: 2px solid #ff2e63; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); text-align: center; }
     </style>
     """,
     unsafe_allow_html=True
 )
-BACKEND_URL = os.getenv("BACKEND_URL", "http://backend:8000")
+
+BACKEND_URL = os.getenv("BACKEND_URL", "https://your-fastapi-url.onrender.com")
 
 st.markdown('<h1 class="title-container">💬 Smart PDF Q&A Bot</h1>', unsafe_allow_html=True)
 
@@ -97,21 +48,21 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# File uploader - Fixed at bottom with gradient effect
+# File uploader
 st.markdown('<div class="upload-container">', unsafe_allow_html=True)
 uploaded_file = st.file_uploader("📂 Upload a PDF to begin", type="pdf")
 st.markdown('</div>', unsafe_allow_html=True)
 
 if uploaded_file and "pdf_processed" not in st.session_state:
     with st.spinner("📤 Uploading and processing PDF..."):
-        files = {"file": uploaded_file.getvalue()}
-        response = requests.post(f"{BACKEND_URL}/process/", files=files)
-        if response.status_code == 200:
+        files = {"file": ("document.pdf", uploaded_file, "application/pdf")}
+        try:
+            response = requests.post(f"{BACKEND_URL}/process/", files=files, timeout=30)
+            response.raise_for_status()
             st.session_state.pdf_processed = True
             st.success("✅ PDF processed! Ask your questions above.")
-        else:
-            st.error("❌ Failed to process PDF.")
-
+        except requests.exceptions.RequestException as e:
+            st.error(f"❌ Error processing PDF: {e}")
 
 # Chat input field
 if st.session_state.get("pdf_processed", False):
@@ -123,9 +74,12 @@ if st.session_state.get("pdf_processed", False):
 
         # Get AI response
         with st.spinner("🤖 Thinking..."):
-            response = requests.post(f"{BACKEND_URL}/ask/", params={"query": query})
-            answer = response.json().get("answer", "❌ Error fetching answer.")
-
+            try:
+                response = requests.post(f"{BACKEND_URL}/ask/", json={"query": query}, timeout=15)
+                response.raise_for_status()
+                answer = response.json().get("answer", "❌ No answer available.")
+            except requests.exceptions.RequestException as e:
+                answer = f"❌ Error: {e}"
 
         # Display assistant message
         st.session_state.messages.append({"role": "assistant", "content": answer})
